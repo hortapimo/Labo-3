@@ -82,3 +82,23 @@ if __name__ == "__main__":
     ax4.scatter(tiempo4*1e6, voltaje_prescale_4*1e3,
                 s=10, c="black", zorder=2)
     ax4.set_title("Medicion con pre-scaler en 4")
+    
+    
+    # FIGURAS TIEMPO
+    deltas=[(tiempo1[2:-1] -tiempo1[1:-2]) *1e6,
+            (tiempo2[2:-1]-tiempo2[1:-2]) *1e6,
+            (tiempo3[2:-1]-tiempo3[1:-2])*1e6,
+            (tiempo4[2:-1]-tiempo4[1:-2])*1e6]
+    
+    
+    fig, ax =plt.subplots(2,2)
+    k=1
+    for i in range(2):
+        for j in range(2):
+            pesos = np.ones_like(deltas[k-1]) * 100 / len(deltas[k-1])
+            ax[i,j].hist(deltas[k-1], bins =50, weights=pesos)
+            ax[i,j].set_xlabel(f"tiempo [$\mu$ seg]")
+            ax[i,j].set_ylabel("%")
+            ax[i,j].set_title(f"Pre-scale en 0x0{k}")
+            k=k+1
+    #plt.suptitle("Distribucion del periodo de muestreo para cada pre-scale")

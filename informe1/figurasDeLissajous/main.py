@@ -30,16 +30,16 @@ def cargar_datos_npy(nombre_archivo):
     except Exception as e:
         print(f"Ocurrió un error al cargar el archivo: {e}")
         return None
+escala=1500
+chanel1_0gr = cargar_datos_npy('ch1_0grd.npy')*(escala/255)-escala/2
+chanel1_45gr = cargar_datos_npy('ch1_45grd.npy')*(escala/255)-escala/2
+chanel1_90gr = cargar_datos_npy('ch1_90grd.npy')*(escala/255)-escala/2
+chanel1_180gr = cargar_datos_npy('ch1_180grd.npy')*(escala/255)-escala/2
 
-chanel1_0gr = cargar_datos_npy('ch1_0grd.npy')*(1000/255)-500
-chanel1_45gr = cargar_datos_npy('ch1_45grd.npy')*(1000/255)-500
-chanel1_90gr = cargar_datos_npy('ch1_90grd.npy')*(1000/255)-500
-chanel1_180gr = cargar_datos_npy('ch1_180grd.npy')*(1000/255)-500
-
-chanel2_0gr = cargar_datos_npy('ch2_0grd.npy')*(1000/255)-500
-chanel2_45gr = cargar_datos_npy('ch2_45grd.npy')*(1000/255)-500
-chanel2_90gr = cargar_datos_npy('ch2_90grd.npy')*(1000/255)-500
-chanel2_180gr = cargar_datos_npy('ch2_180grd.npy')*(1000/255)-500
+chanel2_0gr = cargar_datos_npy('ch2_0grd.npy')*(escala/255)-escala/2
+chanel2_45gr = cargar_datos_npy('ch2_45grd.npy')*(escala/255)-escala/2
+chanel2_90gr = cargar_datos_npy('ch2_90grd.npy')*(escala/255)-escala/2
+chanel2_180gr = cargar_datos_npy('ch2_180grd.npy')*(escala/255)-escala/2
 
 def style(ax):
     ax.minorticks_on()
@@ -53,19 +53,19 @@ w=9
        
 fig, ax = plt.subplots(2, 2,figsize=(w, h))
 style(ax[0,0])
-ax[0,0].set_title(f"Desfase de: 0 grados")
+ax[0,0].set_title(f"Desfase teorico de: 0 grados")
 ax[0,0].plot(chanel1_0gr, chanel2_0gr)
 
 style(ax[0,1])
-ax[0,1].set_title(f"Desfase de: 45 grados")
+ax[0,1].set_title(f"Desfase teorico de: 45 grados")
 ax[0,1].plot(chanel1_45gr, chanel2_45gr)
 
 style(ax[1,0])
-ax[1,0].set_title(f"Desfase de: 90 grados")
+ax[1,0].set_title(f"Desfase teorico de: 90 grados")
 ax[1,0].plot(chanel1_90gr, chanel2_90gr)
 
 style(ax[1,1])
-ax[1,1].set_title(f"Desfase de: 180 grados")
+ax[1,1].set_title(f"Desfase teorico de: 180 grados")
 ax[1,1].plot(chanel1_180gr, chanel2_180gr)
 
 
