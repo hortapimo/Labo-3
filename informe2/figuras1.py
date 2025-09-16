@@ -119,7 +119,7 @@ def graficar_con_ajuste(ruta_archivo, ax,title, es_carga=True, tau_teorico =1):
 fig, ax = plt.subplots(nrows = 5, ncols=2, figsize=(10, 6))
 
 # Llama a la función y le pasas el objeto 'ax'
-tau217_Carga = graficar_con_ajuste('data/217Carga.txt', ax[0,0],title="Carga, R=217omh", tau_teorico=22)
+tau217_Carga = graficar_con_ajuste(    , ax[0,0],title="Carga, R=217omh", tau_teorico=22)
 tau217_Desc = graficar_con_ajuste('data/217Descarga.txt', ax[0,1],title="Descarga, R=217omh", es_carga=False, tau_teorico=22)
 
 tau317_Carga = graficar_con_ajuste('data/317Carga.txt', ax[1,0],title="Carga, R=317omh", tau_teorico=32)
