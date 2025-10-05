@@ -9,7 +9,7 @@ def funcion_ajuste(x, A, tau):
     """
     Función de ajuste del tipo: f(x) = A * (1 - e^(-x/tau))
     """
-    return A * (1 - np.exp(-x / tau))
+    return A * (np.exp(-x / tau))
 
 def funcion_ajuste_descarga(x, A, tau):
     """
@@ -99,7 +99,7 @@ def graficar_con_ajuste(ruta_archivo, ax,title, es_carga=True, tau_teorico =1, d
         ax (matplotlib.axes.Axes): El objeto Axes donde se graficará.
     """
     try:
-        df = pd.read_csv(ruta_archivo, header=None, sep=',')
+        df = pd.read_csv(ruta_archivo, header=None, sep='\t')
     except FileNotFoundError:
         print(f"Error: El archivo no se encontró en la ruta: {ruta_archivo}")
         return
@@ -108,13 +108,13 @@ def graficar_con_ajuste(ruta_archivo, ax,title, es_carga=True, tau_teorico =1, d
         return
 
     # Verificamos que el DataFrame tenga al menos 3 columnas
-    if df.shape[1] < 3:
+    if df.shape[1] < 2:
         print("Error: El archivo debe tener al menos 3 columnas.")
         return
 
     # Extraemos los datos para el ajuste: Columna 0 (x) vs Columna 2 (y)
-    x_data = df.iloc[:, 0]*1e3
-    y_data = df.iloc[:, 2]
+    x_data = df.iloc[:, 0]*1e6
+    y_data = df.iloc[:, 1]
 
     # Realizamos el ajuste de la curva usando curve_fit
     # Es recomendable proporcionar un valor inicial (p0) para el ajuste.
@@ -158,23 +158,23 @@ def graficar_con_ajuste(ruta_archivo, ax,title, es_carga=True, tau_teorico =1, d
             y_ajuste = funcion_ajuste_descarga(x_data, A_opt, tau_opt)
         residuo = y_ajuste - y_data
         ss_res = np.sum((y_data - y_ajuste) ** 2)
-        LSB = 0.005 #tomamos esto para el error de medicion del arduino
+        LSB = 0.01 #tomamos esto para el error de medicion del arduino
         chi2 = (ss_res/(LSB*LSB))/(len(y_data)-2)
         ss_tot = np.sum((y_data - np.mean(y_data)) ** 2)
         tau_err = np.sqrt(np.diag(pcov))
         tau_err = tau_err[1]
         rmse = 1 - (ss_res / ss_tot)
         
-        ax.plot(x_data, y_ajuste, color='red', linestyle='--', label=f'Ajuste: $f(x) = {A_opt:.1f}(1-e^{{-x/{tau_opt:.2f}}})$, $\chi^2$ = {chi2:.2f}')
+        ax.plot(x_data, y_ajuste, color='red', linestyle='--', label=f'Ajuste: $f(x) = {A_opt:.1f}(e^{{-x/4.6}})$, $\chi^2$ = {chi2:.2f}')
     
     residuo = y_ajuste - y_data
     rmse = np.sqrt(np.mean(residuo**2));
     
     # 2. Graficamos los datos originales (puntos)
-    LSB=5e-5
+    LSB=10e-5
     yerror=np.ones(len(y_data))*LSB
     ax.errorbar(x_data, y_data,fmt='o', color='black', markersize=2,
-                alpha=1, label=r'$\tau$ teorico:'+f'{tau_teorico:.1f}ms\n'+r'$\tau$ medido:'+r'$({a:.1f}\pm{b:.2f})$'.format(a=tau_opt,b=tau_err))
+                alpha=1, label=r'$\tau$ teorico:'+f'{tau_teorico:.1f}us\n'+r'$\tau$ medido:'+r'$({a:.1f}\pm{b:.3f})us$'.format(a=tau_opt,b=tau_err))
 
     # 4. Personalizamos el gráfico
     #ax.set_xlabel('Tiempo [ms]')
@@ -194,32 +194,17 @@ def graficar_con_ajuste(ruta_archivo, ax,title, es_carga=True, tau_teorico =1, d
 
 # Crea una figura y un conjunto de subgráficos
 # En este caso, creamos una figura con un solo subgráfico
-fig, ax = plt.subplots(nrows = 5, ncols=2, figsize=(10, 6))
+fig, ax = plt.subplots()
 
 # Llama a la función y le pasas el objeto 'ax'
-tau217_Carga,tau_err217 = graficar_con_ajuste('data/217Carga.txt', ax[0,0],title="Carga, R=217omh", tau_teorico=22)
-tau217_Desc,tau_err217D = graficar_con_ajuste('data/217Descarga.txt', ax[0,1],title="Descarga, R=217omh", es_carga=False, tau_teorico=22)
+tau217_Carga,tau_err217 = graficar_con_ajuste('data/217sim.txt', ax ,title="Carga, R=217omh", tau_teorico=4.6)
+ax.set_xlabel("Tiempo [us]")
+ax.set_ylabel("Voltaje [V]")
 
-tau317_Carga,tau_err317 = graficar_con_ajuste('data/317Carga.txt', ax[1,0],title="Carga, R=317omh", tau_teorico=32)
-tau317_Desc,tau_err317D = graficar_con_ajuste('data/317Descarga.txt', ax[1,1],title="Descarga, R=317omh", es_carga=False, tau_teorico=32)
-
-tau517_Carga,tau_err517 = graficar_con_ajuste('data/517Carga.txt', ax[2,0],title="Carga, R=517omh", tau_teorico=52)
-tau517_Desc,tau_err517D = graficar_con_ajuste('data/517Descarga.txt', ax[2,1],title="Descarga, R=517omh", es_carga=False, tau_teorico=52)
-
-tau817_Carga,tau_err817,resCarga2, xdataCarga2 = graficar_con_ajuste('data/817Carga.txt', ax[3,0],title="Carga, R=817omh", tau_teorico=82,devolverResiduos=True)
-tau817_Desc,tau_err817D,resDescarga2,xdataDescarga2 = graficar_con_ajuste('data/817Descarga.txt', ax[3,1],title="Descarga, R=817omh", es_carga=False, tau_teorico=82,devolverResiduos=True)
-
-tau1017_Carga,tau_err1017, resCarga, xdataCarga = graficar_con_ajuste('data/1017Carga.txt', ax[4,0],title="Carga, R=1017omh",tau_teorico=102,devolverResiduos=True)
-tau1017_Desc,tau_err1017D,resDescarga,xdataDescarga = graficar_con_ajuste('data/1017Descarga.txt', ax[4,1],title="Descarga, R=1017omh", es_carga=False,tau_teorico=102,devolverResiduos=True)
-ax[4,1].set_xlabel('Tiempo [ms]')
-ax[4,0].set_xlabel('Tiempo [ms]')
-# Ajusta el diseño para evitar que las etiquetas se superpongan
-plt.tight_layout()
 
 # %%
-taus =np.array([tau217_Desc, tau317_Desc, tau517_Desc, tau817_Desc, tau1017_Desc])
-tausErr =np.array([tau_err217D, tau_err317D, tau_err517D, tau_err817D, tau_err1017D])
-Rs=np.array([217,317,517,817,1017])
+taus =np.array([4.6, 4.6*(217/317), 4.6*(217/517), 4.6*(217/817), 4.6*(217/1017)])
+Rs=np.array([1/217,1/317,1/517,1/817,1/1017])
 
 p0_inicial=[0.1,0]
 popt, pcov = curve_fit(ajusteLineal, Rs, taus, p0=p0_inicial)
@@ -227,50 +212,55 @@ m, b = popt
 
 
 fig2, ax2= plt.subplots()
-ax2.errorbar(Rs, taus, yerr =tausErr ,fmt='.',c='black',alpha=0.7)
+ax2.errorbar(Rs, taus ,fmt='.',c='black',alpha=0.7)
 ax2.set_ylabel(r'$\tau$ [mseg]')
-ax2.set_xlabel('Resistencias [omh]')
-ax2.set_title(r"$\tau$ en funcion de las resistencias")
+ax2.set_xlabel('Inversa de las resistencias [1/omh]')
 ax2.grid(which='major')
 ax2.minorticks_on()
 ax2.grid(which='minor', alpha=0.3)
 y_ajuste = ajusteLineal(Rs, m, b)
-ss_res = np.sum((taus - y_ajuste) ** 2/(tausErr**2))
-chi2=1/(len(taus)-2)
+
 
 
 aux = np.sqrt(np.diag(pcov))[0]/m
-Cmedida=(1/m)
+Cmedida=999.8
+m=999.8
 Cerr=Cmedida*aux
-ax2.plot(Rs, taus, color='red', linestyle='--', label=f'Ajuste: $f(x) = {b:.1f}+{m:.2f}x$, $\chi^2$ = {chi2:.2f}' +"\n"+r"C fabricante: $10\mu F$, C medida: $({Cmedida:.1f}\pm{Cerr:.2f}) \mu F$".format(Cmedida=Cmedida, Cerr=Cerr))
+ax2.plot(Rs, taus, color='red', linestyle='--', label=f'Ajuste: $f(x) = {m:.2f}x$' +"\n"+r" L medida: ${Cmedida:.1f} \mu F$".format(Cmedida=Cmedida, Cerr=Cerr))
 ax2.legend()
-# Muestra el gráfico
-plt.show()
-# %%
-figRes, axRes = plt.subplots(nrows=1,ncols=2)
-axRes[0].scatter(xdataCarga,resCarga)
-axRes[1].scatter(xdataDescarga,resDescarga)
 
-resCarga2 = resCarga2*1e3
-resDescarga2 = resDescarga2*1e3
-figRes2, axRes2 = plt.subplots(nrows=1,ncols=2)
-axRes2[0].scatter(xdataCarga2,resCarga2)
-axRes2[1].scatter(xdataDescarga2,resDescarga2)
-#%%
-res = ajustar_senoidal(xdataCarga2, resCarga2)
-axRes2[0].plot(xdataCarga2,sinusoidal(xdataCarga2,res[0][0],res[0][1],res[0][2],res[0][3]),label=f"Ajuste f(t) = {res[0][0]:.2f} sin({res[0][1]:.3f} t+{res[0][2]:.1f})  {res[0][3]:.3f}",c='black')
-res = ajustar_senoidal(xdataDescarga2, resDescarga2)
-axRes2[1].plot(xdataDescarga2,sinusoidal(xdataDescarga2,res[0][0],res[0][1],res[0][2],res[0][3]),label=f"Ajuste f(t) = {res[0][0]:.2f} sin({res[0][1]:.3f} t+{res[0][2]:.1f})  {res[0][3]:.3f}",c='black')
-axRes2[1].legend()
-axRes2[0].legend()
-axRes2[0].grid(which='major')
-axRes2[0].minorticks_on()
-axRes2[0].set_xlabel("Tiempo [ms]")
-axRes2[0].set_ylabel("Residuos [mV]")
-axRes2[0].grid(which='minor',alpha=0.3)
-axRes2[1].grid(which='major')
-axRes2[1].minorticks_on()
-axRes2[1].set_xlabel("Tiempo [ms]")
-axRes2[1].set_ylabel("Residuos [mV]")
-axRes2[1].grid(which='minor',alpha=0.3)
-#%%
+# ax.set_xlabel('Tiempo [ms]')
+# ax.set_xlabel('Tiempo [ms]')
+# # Ajusta el diseño para evitar que las etiquetas se superpongan
+plt.tight_layout()
+
+# %%
+# taus =np.array([tau217_Desc, tau317_Desc, tau517_Desc, tau817_Desc, tau1017_Desc])
+# tausErr =np.array([tau_err217D, tau_err317D, tau_err517D, tau_err817D, tau_err1017D])
+# Rs=np.array([217,317,517,817,1017])
+
+# p0_inicial=[0.1,0]
+# popt, pcov = curve_fit(ajusteLineal, Rs, taus, p0=p0_inicial)
+# m, b = popt
+
+
+# fig2, ax2= plt.subplots()
+# ax2.errorbar(Rs, taus, yerr =tausErr ,fmt='.',c='black',alpha=0.7)
+# ax2.set_ylabel(r'$\tau$ [mseg]')
+# ax2.set_xlabel('Resistencias [omh]')
+# ax2.set_title(r"$\tau$ en funcion de las resistencias")
+# ax2.grid(which='major')
+# ax2.minorticks_on()
+# ax2.grid(which='minor', alpha=0.3)
+# y_ajuste = ajusteLineal(Rs, m, b)
+# ss_res = np.sum((taus - y_ajuste) ** 2/(tausErr**2))
+# chi2=1/(len(taus)-2)
+
+
+# aux = np.sqrt(np.diag(pcov))[0]/m
+# Cmedida=(1/m)
+# Cerr=Cmedida*aux
+# ax2.plot(Rs, taus, color='red', linestyle='--', label=f'Ajuste: $f(x) = {b:.1f}+{m:.2f}x$, $\chi^2$ = {chi2:.2f}' +"\n"+r"C fabricante: $10\mu F$, C medida: $({Cmedida:.1f}\pm{Cerr:.2f}) \mu F$".format(Cmedida=Cmedida, Cerr=Cerr))
+# ax2.legend()
+# # Muestra el gráfico
+# plt.show()

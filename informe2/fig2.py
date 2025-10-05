@@ -5,6 +5,9 @@ from scipy.optimize import curve_fit
 
 plt.rcParams.update({'font.size': 12})
 
+
+
+
 # 1. Definimos la función para el ajuste
 def funcion_ajuste(x, A, tau):
     """
