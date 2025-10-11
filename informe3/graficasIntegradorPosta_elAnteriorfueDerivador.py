@@ -31,18 +31,15 @@ def formatear(ax,ax2,onlabelI=True,onlabelD=True):
 fig3,ax3=plt.subplots(figsize=(5,3))
 ax4 = ax3.twinx()
 formatear(ax3,ax4,onlabelD=False)
-plotear("datos/der500hz.csv",ax3,ax4)
+plotear("datos/int22500hz,RC.csv",ax3,ax4)
 
 
 fig3,ax3=plt.subplots(figsize=(5,3))
 ax4 = ax3.twinx()
 formatear(ax3,ax4,onlabelI=False, onlabelD=False)
-plotear("datos/der1000hz.csv",ax3,ax4,fin=1.3, inicio = 0)
+plotear("datos/int7500hz,RC.csv",ax3,ax4,fin=1.3, inicio = 0)
 
 fig5,ax5=plt.subplots(figsize=(5,3))
 ax6 = ax5.twinx()
 formatear(ax5,ax6,onlabelI=False)
-plotear("datos/der3000hz.csv",ax5,ax6,fin=3)
-
-
-#%%
+plotear("datos/int3500hz,RC.csv",ax5,ax6,fin=3)

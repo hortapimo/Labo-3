@@ -33,7 +33,6 @@ plt.tight_layout()
 #%% Grafica Fase 2
 fig3, ax3 = plt.subplots(figsize=(10,4))
 mascara= frec < 17e3
-
 ax.set_xlim(right=1.7) 
 ax3.set_xscale('log')
 ax3.set_xlabel("Frecuencia [Hz]")
